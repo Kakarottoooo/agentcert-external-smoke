@@ -1,5 +1,7 @@
 # AgentCert External Smoke
 
+[![AgentCert external smoke](https://github.com/Kakarottoooo/agentcert-external-smoke/actions/workflows/agentcert.yml/badge.svg)](https://github.com/Kakarottoooo/agentcert-external-smoke/actions/workflows/agentcert.yml)
+
 This independent repository proves that a repository with no AgentCert source
 checkout can run the public Tripwire action, produce an evidence bundle, and
 optionally upload that bundle to the hosted AgentCert control plane.
