@@ -1,0 +1,5 @@
+node_modules/
+.agentcert/
+.tripwire/
+demo-server.log
+demo-server.pid

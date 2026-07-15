@@ -1,0 +1,59 @@
+name: AgentCert external smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  tripwire:
+    runs-on: ubuntu-latest
+    env:
+      AGENTCERT_BASE_URL: ${{ vars.AGENTCERT_BASE_URL }}
+      AGENTCERT_PROJECT_ID: ${{ vars.AGENTCERT_PROJECT_ID }}
+      AGENTCERT_API_KEY: ${{ secrets.AGENTCERT_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install fixture dependencies
+        run: npm ci
+
+      - name: Start local demo app
+        run: |
+          node demo-server.mjs > demo-server.log 2>&1 &
+          echo $! > demo-server.pid
+          for attempt in {1..20}; do
+            if curl --fail --silent http://127.0.0.1:3020/health >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat demo-server.log
+          exit 1
+
+      - uses: Kakarottoooo/agentcert/actions/tripwire@v0
+        with:
+          config: tripwire.yml
+          out: .tripwire/latest
+          fail-under: "0.8"
+          subject: agentcert-external-smoke
+          agentcert-out: .agentcert/latest
+          fail-on-verdict: "true"
+
+      - name: Upload evidence to hosted AgentCert
+        if: ${{ env.AGENTCERT_API_KEY != '' }}
+        run: npx --yes agentcert@0.2.1 push --evidence .agentcert/latest/agentcert-evidence.json
+
+      - name: Stop local demo app
+        if: always()
+        run: |
+          if [ -f demo-server.pid ]; then
+            kill "$(cat demo-server.pid)" || true
+          fi
