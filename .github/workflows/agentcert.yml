@@ -47,9 +47,13 @@ jobs:
           agentcert-out: .agentcert/latest
           fail-on-verdict: "true"
 
+      - name: Connect to hosted AgentCert
+        if: ${{ env.AGENTCERT_API_KEY != '' }}
+        run: npx --yes agentcert@0.2.2 connect --name ci
+
       - name: Upload evidence to hosted AgentCert
         if: ${{ env.AGENTCERT_API_KEY != '' }}
-        run: npx --yes agentcert@0.2.1 push --evidence .agentcert/latest/agentcert-evidence.json
+        run: npx --yes agentcert@0.2.2 push --connection ci --evidence .agentcert/latest/agentcert-evidence.json
 
       - name: Stop local demo app
         if: always()
