@@ -16,8 +16,8 @@ jobs:
       AGENTCERT_PROJECT_ID: ${{ vars.AGENTCERT_PROJECT_ID }}
       AGENTCERT_API_KEY: ${{ secrets.AGENTCERT_API_KEY }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
         with:
           node-version: "22"
           cache: npm
@@ -38,7 +38,8 @@ jobs:
           cat demo-server.log
           exit 1
 
-      - uses: Kakarottoooo/agentcert/actions/tripwire@v0
+      - id: agentcert
+        uses: Kakarottoooo/agentcert/actions/tripwire@v0
         with:
           config: tripwire.yml
           out: .tripwire/latest
@@ -47,13 +48,17 @@ jobs:
           agentcert-out: .agentcert/latest
           fail-on-verdict: "true"
 
+      - name: Verify stable Action release
+        shell: bash
+        run: test "${{ steps.agentcert.outputs.agentcert-version }}" = "0.2.7"
+
       - name: Connect to hosted AgentCert
         if: ${{ env.AGENTCERT_API_KEY != '' }}
-        run: npx --yes agentcert@0.2.2 connect --name ci
+        run: npx --yes agentcert@0.2.7 connect --name ci
 
       - name: Upload evidence to hosted AgentCert
         if: ${{ env.AGENTCERT_API_KEY != '' }}
-        run: npx --yes agentcert@0.2.2 push --connection ci --evidence .agentcert/latest/agentcert-evidence.json
+        run: npx --yes agentcert@0.2.7 push --connection ci --evidence .agentcert/latest/agentcert-evidence.json
 
       - name: Stop local demo app
         if: always()

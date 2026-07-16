@@ -14,6 +14,7 @@ connect to a real business system.
 1. `Kakarottoooo/agentcert/actions/tripwire@v0` runs from an external repository.
 2. A Playwright browser agent is evaluated against six reproducible faults.
 3. JUnit, HTML, screenshots, traces, a badge, and AgentCert evidence are uploaded as a workflow artifact.
-4. When repository credentials are configured, `agentcert@0.2.2 connect` validates and saves a CI connection before the public package uploads evidence to the hosted control plane.
+4. The workflow asserts that `actions/tripwire@v0` bundles the published `agentcert@0.2.7` CLI.
+5. When repository credentials are configured, `agentcert@0.2.7 connect` validates and saves a CI connection before the public package uploads evidence to the hosted control plane.
 
 Run the workflow from the Actions tab or push to `main`.
